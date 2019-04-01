@@ -1,5 +1,6 @@
 package com.example.mihailov.lt.models;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -7,34 +8,43 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import com.edmodo.cropper.cropwindow.edge.Edge;
+import com.example.mihailov.lt.presenter.WorkWithCam;
 import com.example.mihailov.lt.presenter.WorkWithCrop;
+
+import org.reactivestreams.Subscriber;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.Subject;
+
 
 public class CroppedImg  {
 
-    private String TAG = getClass().getSimpleName();
-
+    private Disposable disposable;
     private int pictureWidth;
     private int pictureHeight;
     private float layoutWidth;
     private float layoutHeight;
-    private int x, y,h,w;
-    private double scaleH ;
-    private double scaleW;
     private WorkWithCrop workWithCrop;
-    private AsyncCrop asyncCrop;
-    public CroppedImg(WorkWithCrop workWithCrop) {
+
+
+
+    public void setPresenterInterface(WorkWithCrop workWithCrop){
         this.workWithCrop = workWithCrop;
     }
-
     public void setPictureSize(int pictureWidth, int pictureHeight) {
         this.pictureWidth = pictureWidth;
         this.pictureHeight = pictureHeight;
-
-
     }
 
     public void setLayoutSize(int layoutWidth, int layoutHeight) {
@@ -42,72 +52,36 @@ public class CroppedImg  {
         this.layoutHeight = layoutHeight;
     }
 
-    public void setCroppedImg(byte[] data){
+    @SuppressLint("CheckResult")
+    public void setCroppedImg(byte[] data) {
 
-        asyncCrop = new AsyncCrop();
-        asyncCrop.execute(data);
+       disposable = Observable.just(getBitmap(data))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(new Consumer<Bitmap>() {
+                    @Override
+                    public void accept(Bitmap bitmap) throws Exception {
+                        workWithCrop.setCropImgForOCR(bitmap);
+                    }
+                });
+    }
 
+    private Bitmap getBitmap(byte[] data) {
+        double scaleH = pictureHeight / layoutHeight;
+        double scaleW = pictureWidth / layoutWidth;
+        int x = (int) (Edge.TOP.getCoordinate() * scaleH);
+        int y = (int) (Math.abs(layoutWidth - Edge.RIGHT.getCoordinate()) * scaleW);
+        int w = (int) (Edge.getWidth() * scaleW);
+        int h = (int) (Edge.getHeight() * scaleH);
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        Bitmap picture = BitmapFactory.decodeByteArray(data, 0,data.length , options);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        return Bitmap.createBitmap(picture, x, y, h, w,matrix,true);
     }
 
     public void stopCroppedImg(){
-        if(asyncCrop!=null)asyncCrop.cancel(true);
+        if(disposable!=null) disposable.dispose();
     }
-
-
- class AsyncCrop extends AsyncTask<byte[],Void,Bitmap>{
-     @Override
-     protected void onPostExecute(Bitmap bitmap) {
-         super.onPostExecute(bitmap);
-         workWithCrop.setCropImgForOCR(bitmap);
-         cancel(true);
-     }
-
-     @Override
-     protected Bitmap doInBackground(byte[]... bytes) {
-         scaleH = pictureHeight/layoutHeight;
-         scaleW = pictureWidth/layoutWidth;
-
-         x = (int) (Edge.TOP.getCoordinate()*scaleH );
-         y = (int) (Math.abs(layoutWidth-Edge.RIGHT.getCoordinate())*scaleW);
-         w = (int) (Edge.getWidth() * scaleW);
-         h = (int) (Edge.getHeight() * scaleH);
-
-         final BitmapFactory.Options options = new BitmapFactory.Options();
-         options.inPurgeable = true;
-         options.inInputShareable = true;
-
-
-         Bitmap picture = BitmapFactory.decodeByteArray(bytes[0], 0,bytes[0].length , options);
-
-         Matrix matrix = new Matrix();
-         matrix.postRotate(90);
-
-
-         final Bitmap croppedPicture = Bitmap.createBitmap(picture, x, y, h, w,matrix,true);
-         Log.d(TAG, "setCroppedImg: "+pictureWidth+" "+pictureHeight);
-
-
-
-         File file = new File(new File(Environment.getExternalStorageDirectory() + "/DirName"), "top2.jpg");
-         Log.d(TAG, "doInBackground: "+Environment.getExternalStorageDirectory() + "/DirName");
-
-         if (file.exists()) {
-             file.delete();
-         }
-
-         try
-         {
-             FileOutputStream os = new FileOutputStream(file);
-             croppedPicture.compress(Bitmap.CompressFormat.JPEG, 80, os); // bmp is your Bitmap instance
-
-             os.close();
-         }
-         catch (Exception e)
-         {
-             Log.d(TAG, "onPictureTaken: "+e);
-         }
-         return croppedPicture;
-     }
-
- }
 }

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -16,17 +15,17 @@ import android.widget.RelativeLayout;
 import com.edmodo.cropper.cropwindow.CropOverlayView;
 import com.example.mihailov.lt.MainActivity;
 import com.example.mihailov.lt.R;
-import com.example.mihailov.lt.presenter.CamManager;
-
+import com.example.mihailov.lt.dagger.CamModule;
+import com.example.mihailov.lt.dagger.DaggerCamComponent;
+import com.example.mihailov.lt.presenter.CamPresenter;
+import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CamInput extends Fragment implements CamInterface {
+public class CamFragment extends Fragment implements CamInterface {
 
     @BindView(R.id.cam)
     SurfaceView surfaceView;
-
-
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
     @BindView(R.id.layout_cam)
@@ -34,22 +33,27 @@ public class CamInput extends Fragment implements CamInterface {
     @BindView(R.id.cropOverlayView)
     CropOverlayView cropOverlayView;
     private Rect cropRect;
-    private String TAG = this.getClass().getSimpleName();
-    private CamManager camManager;
+    @Inject
+    CamPresenter camPresenter;
     private MainActivity mainActivity;
 
     @Override
     public void onResume() {
         super.onResume();
-        if(camManager!=null)camManager.openCam();
+        if(camPresenter !=null) camPresenter.openCam();
     }
+
+
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.ocr_layout, container, false);
         ButterKnife.bind(this, view);
-        Log.d(TAG, "onCreateView: ");
-        camManager = new CamManager(getContext(),this);
-        camManager.createCam(surfaceView);
+        DaggerCamComponent.builder()
+                .camModule(new CamModule(surfaceView,getContext()))
+                .build().inject(this);
+
+        camPresenter.setFragmentCallback(this);
         progressBar.getIndeterminateDrawable().setColorFilter(getResources()
                 .getColor(R.color.cpb_red),PorterDuff.Mode.SRC_IN);
         progressBar.setVisibility(View.INVISIBLE);
@@ -69,7 +73,7 @@ public class CamInput extends Fragment implements CamInterface {
                 cropRect.right = frameLayout.getMeasuredWidth();
                 cropRect.bottom = frameLayout.getMeasuredHeight();
                 cropOverlayView.setBitmapRect(cropRect);
-                camManager.setLayoutSize(frameLayout.getMeasuredWidth(),frameLayout.getMeasuredHeight());
+                camPresenter.setLayoutSize(frameLayout.getMeasuredWidth(),frameLayout.getMeasuredHeight());
             }
         });
 
@@ -83,15 +87,18 @@ public class CamInput extends Fragment implements CamInterface {
         mainActivity.setCamTheme();
     }
 
-    public void closeCam(){
-        camManager.closeCam();
+    private void closeCam(){
+        camPresenter.closeCam();
     }
+
     public void camFocus(){
-        camManager.camFocus();
+
+        camPresenter.camFocus();
     }
+
     public void stopOCR(){
         progressBar.setVisibility(View.INVISIBLE);
-        camManager.stopOCR();
+        camPresenter.stopOCR();
     }
 
     @Override
@@ -106,4 +113,15 @@ public class CamInput extends Fragment implements CamInterface {
         mainActivity.setResultTheme(result);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        closeCam();
+
+    }
 }

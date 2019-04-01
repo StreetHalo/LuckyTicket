@@ -14,5 +14,5 @@ public interface WorkWithCam {
 
     void setPicSize(int pictureWidth, int pictureHeight);
 
-
+    void openCam();
 }

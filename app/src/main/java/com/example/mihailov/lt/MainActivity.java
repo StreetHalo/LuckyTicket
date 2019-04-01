@@ -1,24 +1,19 @@
 package com.example.mihailov.lt;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import com.example.mihailov.lt.fragments.CamInput;
-import com.example.mihailov.lt.fragments.KeyboardInput;
+import com.example.mihailov.lt.fragments.CamFragment;
+import com.example.mihailov.lt.fragments.KeyboardFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,8 +24,8 @@ public class MainActivity extends AppCompatActivity  {
     private boolean takePic = false;
     private  final String TAG = this.getClass().getSimpleName();
     private FragmentTransaction fragmentManager;
-    private CamInput camInput;
-    private KeyboardInput keyboardInput;
+    private CamFragment camInput;
+    private KeyboardFragment keyboardInput;
     private final int LUCKY_NUMBER = 1;
     private final int NON_LUCKY_NUMBER = 0;
     private final int EMPTY_ARRAY = 2;
@@ -59,8 +54,8 @@ public class MainActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        keyboardInput = new KeyboardInput();
-        camInput = new CamInput();
+        keyboardInput = new KeyboardFragment();
+        camInput = new CamFragment();
       setCamFragment();
 
     }
@@ -95,11 +90,15 @@ public class MainActivity extends AppCompatActivity  {
 
     public void freezeButtonCam(){
         takePic = true;
-        Log.d(TAG, "freezeButtonCam: ");
         checkButton.setBackgroundResource(R.drawable.active_action_button);
         keyButton.setEnabled(false);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopWork();
+    }
 
     public void setResultTheme(int result) {
         takePic = false;
@@ -122,25 +121,16 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void startWork(){
-        Log.d(TAG, "startWork: ");
         camInput.camFocus();
     }
 
     private void stopWork(){
         camInput.stopOCR();
         takePic = false;
+        keyButton.setEnabled(true);
         checkButton.setBackgroundResource(R.drawable.action_button);
     }
 
-
-    public void callKeyBoard(EditText text){
-        Log.d(TAG, "callKeyBoard: "+text.getId());
-        text.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
-
-
-    }
     public void setCamTheme(){
         camButton.setVisibility(View.INVISIBLE);
         keyButton.setVisibility(View.VISIBLE);
@@ -163,12 +153,9 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void setDefaultTheme(){
-
         if(keyboardInput.isVisible())setTextTheme();
         else setCamTheme();
     }
-
-
 
     private void setLuckyDialog(){
 

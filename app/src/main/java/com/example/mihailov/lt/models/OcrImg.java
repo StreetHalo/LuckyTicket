@@ -1,75 +1,79 @@
 package com.example.mihailov.lt.models;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.example.mihailov.lt.presenter.WorkWithCrop;
 import com.example.mihailov.lt.presenter.WorkWithOCR;
 import com.googlecode.tesseract.android.TessBaseAPI;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class OcrImg {
     private String TAG = OcrImg.class.getSimpleName();
     private Context context;
     private WorkWithOCR workWithOCR;
+    private Disposable disposable;
+    private boolean isWork = false;
     private String retStr = "No result";
-    private AsyncOcr asyncOcr;
-    public OcrImg(Context context, WorkWithOCR workWithOCR){
+
+
+    public OcrImg(Context context){
         this.context = context;
+    }
+
+    public void setPresenterInterface(WorkWithOCR workWithOCR){
         this.workWithOCR = workWithOCR;
     }
 
-    public void getText(Bitmap bitmap){
+    @SuppressLint("CheckResult")
+    public void getText(Bitmap bitmap){ isWork = true;
+     disposable =   Observable.just(setBitmap(bitmap))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        if(isWork)
+                        workWithOCR.getResult(s);
 
-        asyncOcr = new AsyncOcr();
-        asyncOcr.execute(bitmap);
+                    }
+                });
+
+    }
+
+    private String setBitmap(Bitmap bitmap){
+        TessBaseAPI  tessBaseAPI = new TessBaseAPI();
+        Log.d(TAG, "setBitmap: 1");
+        tessBaseAPI.init(context.getExternalFilesDir("/").getPath() + "/","eng");
+        tessBaseAPI.setImage(bitmap);
+        try{
+            retStr = tessBaseAPI.getUTF8Text();
+            tessBaseAPI.clear();
+            tessBaseAPI.end();
+            Log.d(TAG, "getText in: "+retStr);
+            retStr = retStr.replaceAll("\\d+[a-z,A-Z]", " ");
+            Log.d(TAG, "getText out: "+retStr);
+            retStr = retStr.replaceAll("[^0-9]+", " ");
+            Log.d(TAG, "getText out1: "+retStr);
+            retStr = retStr.replaceAll("\\s+","");
+
+        }catch (Exception e){
+            Log.e(TAG, e.getMessage());
+        }
+        return retStr;
 
     }
 
     public void stopOCR(){
-
-        if(asyncOcr!=null)
-            asyncOcr.cancel(true);
-
+        isWork = false;
+        if(disposable!=null) disposable.dispose();
     }
 
-
-    private class AsyncOcr extends AsyncTask<Bitmap,Void,String>{
-
-        @Override
-        protected String doInBackground(Bitmap... voids) {
-            TessBaseAPI  tessBaseAPI = new TessBaseAPI();
-            tessBaseAPI.init(context.getExternalFilesDir("/").getPath() + "/","eng");
-            Log.d(TAG, "doInBackground: path "+context.getExternalFilesDir("/").getPath() + "/"+"eng");
-            //   tessBaseAPI.setVariable("tessedit_char_whitelist", "0123456789");
-            tessBaseAPI.setImage(voids[0]);
-            try{
-                retStr = tessBaseAPI.getUTF8Text();
-                tessBaseAPI.clear();
-                tessBaseAPI.end();
-                if(isCancelled()) return null;
-                Log.d(TAG, "getText in: "+retStr);
-               retStr = retStr.replaceAll("\\d+[a-z,A-Z]", " ");
-                Log.d(TAG, "getText out: "+retStr);
-                retStr = retStr.replaceAll("[^0-9]+", " ");
-                Log.d(TAG, "getText out1: "+retStr);
-                retStr = retStr.replaceAll("\\s+","");
-
-            }catch (Exception e){
-                Log.e(TAG, e.getMessage());
-
-            }
-            return retStr;
-        }
-
-        @Override
-        protected void onPostExecute(String aVoid) {
-            super.onPostExecute(aVoid);
-            Log.d(TAG, "onPostExecute: "+aVoid);
-            workWithOCR.getResult(aVoid);
-            cancel(true);
-        }
-
-    }
 }

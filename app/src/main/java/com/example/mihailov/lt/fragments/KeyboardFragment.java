@@ -20,7 +20,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class KeyboardInput extends Fragment  {
+public class KeyboardFragment extends Fragment  {
 
     @BindView(R.id.editText2)
     EditText numbers;
@@ -33,9 +33,7 @@ public class KeyboardInput extends Fragment  {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.keyboard_layout,container,false);
         ButterKnife.bind(this,view);
-        Log.d(TAG, "onCreateView: ");
         calculator = new Calculator();
-
         return view;
     }
     @Override

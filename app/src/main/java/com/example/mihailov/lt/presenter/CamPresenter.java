@@ -2,19 +2,18 @@ package com.example.mihailov.lt.presenter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.example.mihailov.lt.fragments.CamFragment;
 import com.example.mihailov.lt.fragments.CamInterface;
 import com.example.mihailov.lt.models.Calculator;
 import com.example.mihailov.lt.models.Cam;
 import com.example.mihailov.lt.models.CroppedImg;
 import com.example.mihailov.lt.models.OcrImg;
 import com.example.mihailov.lt.R;
-import com.example.mihailov.lt.models.StringToNumbers;
 
-public class CamManager implements WorkWithCam,WorkWithCrop,WorkWithOCR {
+public class CamPresenter implements WorkWithCam,WorkWithCrop,WorkWithOCR {
 
     private Context context;
     private boolean stopAll;
@@ -23,18 +22,21 @@ public class CamManager implements WorkWithCam,WorkWithCrop,WorkWithOCR {
     private CroppedImg croppedImg;
     private CamInterface camInterface;
     private Calculator calculator;
-    private String TAG = getClass().getSimpleName();
-    public CamManager(Context context, CamInterface camInterface) {
+
+
+    public CamPresenter(OcrImg ocrImg, Cam cam, CroppedImg croppedImg, Calculator calculator, Context context) {
+        this.ocrImg = ocrImg;
+        ocrImg.setPresenterInterface(this);
+        this.cam = cam;
+        cam.setPresenterInterface(this);
+        this.croppedImg = croppedImg;
+        croppedImg.setPresenterInterface(this);
+        this.calculator = calculator;
         this.context = context;
-        this.camInterface = camInterface;
-        croppedImg = new CroppedImg(this);
-        ocrImg = new OcrImg(context,this);
-        calculator = new Calculator();
     }
 
-    public void createCam(SurfaceView surfaceView){
-        cam = new Cam(surfaceView,this);
-    }
+
+
 
     @Override
     public void stopOCR() {
@@ -42,14 +44,13 @@ public class CamManager implements WorkWithCam,WorkWithCrop,WorkWithOCR {
         cam.stopCam();
         croppedImg.stopCroppedImg();
         ocrImg.stopOCR();
-
     }
 
 
     @Override
     public void camFocus() {
         if(stopAll) stopAll = false;
-        cam.camFocus();
+        cam.focusCam();
     }
 
     @Override
@@ -95,5 +96,18 @@ public class CamManager implements WorkWithCam,WorkWithCrop,WorkWithOCR {
     @Override
     public void setPicSize(int pictureWidth, int pictureHeight) {
         croppedImg.setPictureSize(pictureWidth,pictureHeight);
+    }
+
+    @Override
+    public void openCam() {
+        cam.openCam();
+    }
+
+    public void setFragmentCallback(CamInterface camInterface) {
+        this.camInterface = camInterface;
+    }
+
+    public CamInterface getFragmentCallback() {
+        return camInterface;
     }
 }
