@@ -3,7 +3,7 @@
 ### About
 App can check your ticket's numer on the good luck. <br />
 You can input number with keyboard or select an area with a number and just make photo. <br />
-After then app calculate number's ticket and show you answer.<br />
+After then app calculate ticket's numer and show you answer.<br />
 
 This app using MVP arcitecture pattern and android.hardware.Camera.
 
