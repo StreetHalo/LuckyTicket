@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup.LayoutParams;
@@ -20,7 +19,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camera.AutoFocusCallback,Camera.PictureCallback {
-    private Camera camera;
+    private static Camera camera = Camera.open();
     private SurfaceView surfaceView;
     private Disposable disposable;
     private int degree = 90;
@@ -31,6 +30,7 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
 
     public Cam(SurfaceView surfaceView) {
         this.surfaceView = surfaceView;
+        if(camera!=null)
         openCam();
     }
 
@@ -43,8 +43,7 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
             camera.setPreviewCallback(null);
             camera.stopPreview();
             camera.release();
-            camera = null;
-        }
+            camera = null;        }
     }
 
     public void focusCam(){
@@ -53,13 +52,13 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
     }
 
     public void openCam(){
-        camera = Camera.open();
+        if(camera==null) camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
         List<String> supportedFocusModes = camera.getParameters().getSupportedFocusModes();
         hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
-
     }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
@@ -97,6 +96,7 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
         {
             workWithCam.autoFocus();
             camera.takePicture(null, null, null, this);
+          //  camera.startPreview();
         }
         else {
             workWithCam.nonAutoFocus();
@@ -107,10 +107,10 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
     @SuppressLint("CheckResult")
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
-
-      disposable=  Observable.just(getXYfromBytes(bytes))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        camera.startPreview();
+        disposable=  Observable.just(getXYfromBytes(bytes))
+              .observeOn(Schedulers.io())
+              .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<byte[]>() {
                     @Override
                     public void accept(byte[] bytes) throws Exception {

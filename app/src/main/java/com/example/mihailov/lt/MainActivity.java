@@ -1,11 +1,17 @@
 package com.example.mihailov.lt;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -22,13 +28,13 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity  {
     private boolean takePic = false;
-    private  final String TAG = this.getClass().getSimpleName();
     private FragmentTransaction fragmentManager;
     private CamFragment camInput;
     private KeyboardFragment keyboardInput;
     private final int LUCKY_NUMBER = 1;
     private final int NON_LUCKY_NUMBER = 0;
     private final int EMPTY_ARRAY = 2;
+    private final int PERMISSION_REQUEST_CODE = 55;
 
     @BindView(R.id.btnWithText)
     ImageButton checkButton;
@@ -56,15 +62,15 @@ public class MainActivity extends AppCompatActivity  {
         ButterKnife.bind(this);
         keyboardInput = new KeyboardFragment();
         camInput = new CamFragment();
-      setCamFragment();
-
+        setKeyFragment();
     }
 
     @OnClick(R.id.btnWithText)
- void click(){
+    void click(){
         if(camInput.isVisible()) {
+
             if (!takePic) {
-                startWork();
+             startWork();
             } else {
                 stopWork();
             }
@@ -73,18 +79,24 @@ public class MainActivity extends AppCompatActivity  {
 
     }
 
-    @OnClick(R.id.camMode)
-    void setKeyFragment(){
-        fragmentManager = getSupportFragmentManager().beginTransaction();
-        fragmentManager.replace(R.id.layout,camInput);
-        fragmentManager.commit();
+
+    private void requestPermissions(){
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},PERMISSION_REQUEST_CODE);
     }
 
     @OnClick(R.id.textMode)
+    void setKeyFragment(){
+        callKeyFragment();
+    }
+
+    @OnClick(R.id.camMode)
     void setCamFragment(){
-        fragmentManager = getSupportFragmentManager().beginTransaction();
-        fragmentManager.replace(R.id.layout,keyboardInput);
-        fragmentManager.commit();
+        if (Build.VERSION.SDK_INT >= 23) {
+
+            requestPermissions();
+        } else {
+            callCamFragment();
+        }
     }
 
 
@@ -125,7 +137,6 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void stopWork(){
-        camInput.stopOCR();
         takePic = false;
         keyButton.setEnabled(true);
         checkButton.setBackgroundResource(R.drawable.action_button);
@@ -218,5 +229,28 @@ public class MainActivity extends AppCompatActivity  {
         dialogNonLucky.show();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            callCamFragment();
 
+        } else
+            Toast.makeText(this, "Для работы приложения необходим доступ к камере", Toast.LENGTH_LONG).show();
+
+    }
+
+    private void callCamFragment(){
+        fragmentManager = getSupportFragmentManager().beginTransaction();
+        fragmentManager.replace(R.id.layout,camInput);
+        fragmentManager.commit();
+
+    }
+
+    private void callKeyFragment(){
+        fragmentManager = getSupportFragmentManager().beginTransaction();
+        fragmentManager.replace(R.id.layout,keyboardInput);
+        fragmentManager.commit();
+
+    }
 }

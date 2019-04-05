@@ -56,7 +56,8 @@ public class CroppedImg  {
     public void setCroppedImg(byte[] data) {
 
        disposable = Observable.just(getBitmap(data))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Bitmap>() {
                     @Override
                     public void accept(Bitmap bitmap) throws Exception {

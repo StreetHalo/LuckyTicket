@@ -1,10 +1,18 @@
 package com.example.mihailov.lt.fragments;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.view.ContextThemeWrapper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -33,6 +41,7 @@ public class CamFragment extends Fragment implements CamInterface {
     @BindView(R.id.cropOverlayView)
     CropOverlayView cropOverlayView;
     private Rect cropRect;
+    private SharedPreferences sharedPreferences;
     @Inject
     CamPresenter camPresenter;
     private MainActivity mainActivity;
@@ -43,7 +52,15 @@ public class CamFragment extends Fragment implements CamInterface {
         if(camPresenter !=null) camPresenter.openCam();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+         sharedPreferences = getActivity().getSharedPreferences("SHOW_DIALOG",0);
+        boolean ifShowInfo = sharedPreferences.getBoolean("SHOW",true);
+        Log.d("CREATE", "onCreate: "+ifShowInfo);
+        if(ifShowInfo)  showDialog();
 
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -121,7 +138,38 @@ public class CamFragment extends Fragment implements CamInterface {
     @Override
     public void onPause() {
         super.onPause();
+        stopOCR();
+
         closeCam();
+    }
+
+
+
+    private void showDialog(){
+
+
+        new AlertDialog.Builder(getContext())
+
+                .setTitle("Инструкция")
+                .setMessage("\n- Выделите область с номером\n\n" +
+                        "- Нажмите на белую кнопку\n\n" +
+                                "- Удачи!\n")
+                .setNegativeButton("Не показывать", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean("SHOW",false);
+                        editor.apply();
+                    }
+                })
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).create().show();
 
     }
+
+
 }

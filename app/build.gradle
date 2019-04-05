@@ -1,4 +1,18 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
@@ -6,7 +20,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.mihailov.lt"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"

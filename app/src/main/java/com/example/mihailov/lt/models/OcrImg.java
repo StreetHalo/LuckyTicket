@@ -2,12 +2,18 @@ package com.example.mihailov.lt.models;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.mihailov.lt.SplashActivity;
 import com.example.mihailov.lt.presenter.WorkWithCrop;
 import com.example.mihailov.lt.presenter.WorkWithOCR;
 import com.googlecode.tesseract.android.TessBaseAPI;
+
+import java.io.IOException;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -16,13 +22,14 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class OcrImg {
-    private String TAG = OcrImg.class.getSimpleName();
     private Context context;
     private WorkWithOCR workWithOCR;
     private Disposable disposable;
     private boolean isWork = false;
     private String retStr = "No result";
+    private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Lucky/";
 
+    private static final String lang = "eng";
 
     public OcrImg(Context context){
         this.context = context;
@@ -49,23 +56,21 @@ public class OcrImg {
     }
 
     private String setBitmap(Bitmap bitmap){
-        TessBaseAPI  tessBaseAPI = new TessBaseAPI();
-        Log.d(TAG, "setBitmap: 1");
-        tessBaseAPI.init(context.getExternalFilesDir("/").getPath() + "/","eng");
-        tessBaseAPI.setImage(bitmap);
+
+        TessBaseAPI  tessBaseApi = new TessBaseAPI();
+        tessBaseApi.init(DATA_PATH, lang);
+        tessBaseApi.setImage(bitmap);
         try{
-            retStr = tessBaseAPI.getUTF8Text();
-            tessBaseAPI.clear();
-            tessBaseAPI.end();
-            Log.d(TAG, "getText in: "+retStr);
+
+            retStr = tessBaseApi.getUTF8Text();
+            tessBaseApi.clear();
+            tessBaseApi.end();
             retStr = retStr.replaceAll("\\d+[a-z,A-Z]", " ");
-            Log.d(TAG, "getText out: "+retStr);
             retStr = retStr.replaceAll("[^0-9]+", " ");
-            Log.d(TAG, "getText out1: "+retStr);
             retStr = retStr.replaceAll("\\s+","");
 
         }catch (Exception e){
-            Log.e(TAG, e.getMessage());
+            Log.d("ERROR", "setBitmap: "+e.getMessage());
         }
         return retStr;
 

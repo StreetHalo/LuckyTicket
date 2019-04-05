@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mihailov.lt">
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -28,6 +31,4 @@
             android:name="io.fabric.ApiKey"
             android:value="8b9afc6f19d5c0f278586b3fae2fe092f1d88fb3" />
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
