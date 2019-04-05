@@ -7,7 +7,7 @@ After then app calculate ticket's numer and show you answer.<br />
 
 This app using MVP arcitecture pattern and android.hardware.Camera.
 
-### Implementations
+### Libraries
 * [Cropper](https://github.com/edmodo/cropper) - for select an area with a ticket's number;
 * [Tesseract](https://github.com/rmtheis/tess-two) - OCR library for read number from cropped image.
 
