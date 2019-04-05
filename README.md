@@ -18,3 +18,8 @@ For work with views, async tasks and dependency injections:<br />
 If your ticket number not clear , maybe you can get problem with speed and reading numbers.
 
 ### Screenshots
+<p float="left">
+  <img src="https://github.com/StreetHalo/LuckyTicket/blob/master/app/src/main/res/drawable/view_3.jpg" width="250" />
+  <img src="https://github.com/StreetHalo/LuckyTicket/blob/master/app/src/main/res/drawable/view_2.jpg" width="250" /> 
+  <img src="https://github.com/StreetHalo/LuckyTicket/blob/master/app/src/main/res/drawable/view_1.jpg" width="250" />
+</p>
