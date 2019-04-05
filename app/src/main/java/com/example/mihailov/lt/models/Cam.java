@@ -135,5 +135,4 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
         if(disposable!=null) disposable.dispose();
 
     }
-
 }
