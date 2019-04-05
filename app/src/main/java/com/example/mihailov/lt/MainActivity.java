@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity  {
     @OnClick(R.id.btnWithText)
     void click(){
         if(camInput.isVisible()) {
-
             if (!takePic) {
              startWork();
             } else {
@@ -109,7 +108,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onPause() {
         super.onPause();
-        stopWork();
+      if(camInput.isVisible())  stopWork();
     }
 
     public void setResultTheme(int result) {
@@ -137,9 +136,10 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void stopWork(){
-        takePic = false;
+        camInput.stopOCR();
         keyButton.setEnabled(true);
         checkButton.setBackgroundResource(R.drawable.action_button);
+        takePic = false;
     }
 
     public void setCamTheme(){

@@ -83,6 +83,7 @@ public class CroppedImg  {
     }
 
     public void stopCroppedImg(){
+
         if(disposable!=null) disposable.dispose();
     }
 }

@@ -40,7 +40,8 @@ public class OcrImg {
     }
 
     @SuppressLint("CheckResult")
-    public void getText(Bitmap bitmap){ isWork = true;
+    public void getText(Bitmap bitmap){
+        isWork = true;
      disposable =   Observable.just(setBitmap(bitmap))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
