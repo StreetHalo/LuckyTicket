@@ -57,7 +57,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (Build.VERSION.SDK_INT >= 23) {
-           // doOCR();
+           doOCR();
            // requestPermissions();
 
         } else {
