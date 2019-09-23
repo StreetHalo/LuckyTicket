@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.get.lucky.lt.MainActivity"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+    <FrameLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.2"
+        >
+
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.8">
+
+
+        <ImageButton
+            android:id="@+id/btnWithText"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/action_button"
+            android:foregroundGravity="center_vertical|center_horizontal|center"
+            android:src="@drawable/ic_fiber_manual_record_black_24dp"
+            android:textColor="@color/white" />
+
+        <ImageButton
+            android:id="@+id/camMode"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignStart="@+id/textMode"
+            android:layout_alignLeft="@+id/textMode"
+            android:layout_centerVertical="true"
+            android:background="@drawable/cam_circular_button"
+            android:filter="@color/photo"
+            android:src="@drawable/ic_photo_camera_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/textMode"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignTop="@+id/camMode"
+            android:layout_marginEnd="60dp"
+            android:layout_marginRight="60dp"
+            android:layout_toStartOf="@+id/btnWithText"
+            android:layout_toLeftOf="@+id/btnWithText"
+            android:background="@drawable/text_circular_button"
+            android:src="@drawable/ic_keyboard_black_24dp" />
+    </RelativeLayout>
+
+</LinearLayout>
