@@ -1,4 +1,4 @@
-package com.get.lucky.lt.presenter;
+package com.get.lucky.lt.views.cam_fragment;
 
 public interface WorkWithCam {
 

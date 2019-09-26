@@ -4,27 +4,15 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.util.Log;
+
 import com.edmodo.cropper.cropwindow.edge.Edge;
-import com.get.lucky.lt.presenter.WorkWithCrop;
+import com.get.lucky.lt.views.cam_fragment.WorkWithCrop;
 
-import org.reactivestreams.Subscriber;
-
-import java.io.File;
-import java.io.FileOutputStream;
-
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.Subject;
 
 
 public class CroppedImg  {
@@ -51,18 +39,10 @@ public class CroppedImg  {
         this.layoutHeight = layoutHeight;
     }
 
-    @SuppressLint("CheckResult")
-    public void setCroppedImg(byte[] data) {
+    public Observable<Bitmap> setCroppedImg(byte[] data) {
 
-       disposable = Observable.just(getBitmap(data))
-                .subscribeOn(Schedulers.io())
-               .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Bitmap>() {
-                    @Override
-                    public void accept(Bitmap bitmap) throws Exception {
-                        workWithCrop.setCropImgForOCR(bitmap);
-                    }
-                });
+       return Observable.fromCallable(()->getBitmap(data));
+
     }
 
     private Bitmap getBitmap(byte[] data) {
@@ -81,8 +61,4 @@ public class CroppedImg  {
         return Bitmap.createBitmap(picture, x, y, h, w,matrix,true);
     }
 
-    public void stopCroppedImg(){
-
-        if(disposable!=null) disposable.dispose();
-    }
 }

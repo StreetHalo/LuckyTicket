@@ -1,9 +1,11 @@
-package com.get.lucky.lt.fragments;
+package com.get.lucky.lt.views.cam_fragment;
+
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,27 +18,23 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+
 import com.edmodo.cropper.cropwindow.CropOverlayView;
-import com.get.lucky.lt.MainActivity;
+import com.get.lucky.lt.App;
+import com.get.lucky.lt.views.main.MainActivity;
 import com.get.lucky.lt.R;
-import com.get.lucky.lt.dagger.CamModule;
-import com.get.lucky.lt.dagger.DaggerCamComponent;
-import com.get.lucky.lt.presenter.CamPresenter;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 public class CamFragment extends Fragment implements CamInterface {
 
-    @BindView(R.id.cam)
-    SurfaceView surfaceView;
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
-    @BindView(R.id.layout_cam)
-    RelativeLayout frameLayout;
-    @BindView(R.id.cropOverlayView)
-    CropOverlayView cropOverlayView;
+    private SurfaceView surfaceView;
+    private ProgressBar progressBar;
+    private RelativeLayout frameLayout;
+    private CropOverlayView cropOverlayView;
     private Rect cropRect;
     private SharedPreferences sharedPreferences;
     @Inject
@@ -46,29 +44,34 @@ public class CamFragment extends Fragment implements CamInterface {
     @Override
     public void onResume() {
         super.onResume();
-        if(camPresenter !=null) camPresenter.openCam();
+        mainActivity.setDefaultButton();
+        camPresenter.initCam(surfaceView);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-         sharedPreferences = getActivity().getSharedPreferences("SHOW_DIALOG",0);
-        boolean ifShowInfo = sharedPreferences.getBoolean("SHOW",true);
-        if(ifShowInfo)  showDialog();
+        App.daggerCamComponent.inject(this);
+        camPresenter.attach(this);
+        sharedPreferences = getActivity().getSharedPreferences("SHOW_DIALOG", 0);
+        boolean ifShowInfo = sharedPreferences.getBoolean("SHOW", true);
+        if (ifShowInfo) showDialog();
 
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.ocr_layout, container, false);
-        ButterKnife.bind(this, view);
-        DaggerCamComponent.builder()
-                .camModule(new CamModule(surfaceView,getContext()))
-                .build().inject(this);
 
-        camPresenter.setFragmentCallback(this);
+
+        surfaceView = view.findViewById(R.id.cam);
+        progressBar = view.findViewById(R.id.progressBar);
+        frameLayout = view.findViewById(R.id.layout_cam);
+        cropOverlayView = view.findViewById(R.id.cropOverlayView);
+
+
         progressBar.getIndeterminateDrawable().setColorFilter(getResources()
-                .getColor(R.color.cpb_red),PorterDuff.Mode.SRC_IN);
+                .getColor(R.color.cpb_red), PorterDuff.Mode.SRC_IN);
         progressBar.setVisibility(View.INVISIBLE);
         cropRect = new Rect();
         cropRect.left = 0;
@@ -86,30 +89,30 @@ public class CamFragment extends Fragment implements CamInterface {
                 cropRect.right = frameLayout.getMeasuredWidth();
                 cropRect.bottom = frameLayout.getMeasuredHeight();
                 cropOverlayView.setBitmapRect(cropRect);
-                camPresenter.setLayoutSize(frameLayout.getMeasuredWidth(),frameLayout.getMeasuredHeight());
+                camPresenter.setLayoutSize(frameLayout.getMeasuredWidth(), frameLayout.getMeasuredHeight());
             }
         });
 
         return view;
     }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (getActivity() instanceof MainActivity)
             mainActivity = (MainActivity) getActivity();
-        mainActivity.setCamTheme();
     }
 
-    private void closeCam(){
+    private void closeCam() {
         camPresenter.closeCam();
     }
 
-    public void camFocus(){
+    public void camFocus() {
 
         camPresenter.camFocus();
     }
 
-    public void stopOCR(){
+    private void stopOCR() {
         progressBar.setVisibility(View.INVISIBLE);
         camPresenter.stopOCR();
     }
@@ -120,14 +123,36 @@ public class CamFragment extends Fragment implements CamInterface {
         mainActivity.freezeButtonCam();
 
     }
+
     @Override
-    public void setResult(int result) {
+    public void setProgressBarInvisible() {
         progressBar.setVisibility(View.INVISIBLE);
-        mainActivity.setResultTheme(result);
     }
 
     @Override
+    public void setDefaultButton() {
+        mainActivity.setDefaultButton();
+    }
+
+    @Override
+    public void setLuckyTheme() {
+        mainActivity.setLuckyTheme();
+    }
+
+    @Override
+    public void setNonLuckyTheme() {
+        mainActivity.setNonLuckyTheme();
+    }
+
+    @Override
+    public void emptyIntArray() {
+        mainActivity.emptyIntArrayTheme();
+    }
+
+
+    @Override
     public void onDestroy() {
+        camPresenter.detach();
         super.onDestroy();
     }
 
@@ -135,26 +160,27 @@ public class CamFragment extends Fragment implements CamInterface {
     public void onPause() {
         super.onPause();
         stopOCR();
-
         closeCam();
     }
 
+    @Override
+    public void errorMessage() {
+        mainActivity.errorMessage();
+    }
 
+    private void showDialog() {
 
-    private void showDialog(){
-
-
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(Objects.requireNonNull(getContext()))
 
                 .setTitle("Инструкция")
                 .setMessage("\n- Выделите область с номером\n\n" +
                         "- Нажмите на белую кнопку\n\n" +
-                                "- Удачи!\n")
+                        "- Удачи!\n")
                 .setNegativeButton("Не показывать", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean("SHOW",false);
+                        editor.putBoolean("SHOW", false);
                         editor.apply();
                     }
                 })
@@ -164,8 +190,6 @@ public class CamFragment extends Fragment implements CamInterface {
 
                     }
                 }).create().show();
-
     }
-
 
 }

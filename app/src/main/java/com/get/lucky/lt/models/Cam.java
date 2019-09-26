@@ -8,7 +8,7 @@ import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup.LayoutParams;
-import com.get.lucky.lt.presenter.WorkWithCam;
+import com.get.lucky.lt.views.cam_fragment.WorkWithCam;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,7 +19,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camera.AutoFocusCallback,Camera.PictureCallback {
-    private static Camera camera = Camera.open();
     private SurfaceView surfaceView;
     private Disposable disposable;
     private int degree = 90;
@@ -27,11 +26,16 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
     private int w;
     private int h;
     private boolean hasAutoFocus;
+    private Camera camera;
+    public Cam() {
 
-    public Cam(SurfaceView surfaceView) {
+    }
+
+    public void initCam(SurfaceView surfaceView){
         this.surfaceView = surfaceView;
-        if(camera!=null)
-        openCam();
+       // if(camera!=null)
+            openCam();
+
     }
 
     public void setPresenterInterface(WorkWithCam workWithCam){
@@ -48,11 +52,11 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
 
     public void focusCam(){
         camera.autoFocus(this);
-
     }
 
     public void openCam(){
-        if(camera==null) camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+
+        camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
         List<String> supportedFocusModes = camera.getParameters().getSupportedFocusModes();
         hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
@@ -96,7 +100,6 @@ public class Cam implements SurfaceHolder.Callback, Camera.PreviewCallback,Camer
         {
             workWithCam.autoFocus();
             camera.takePicture(null, null, null, this);
-          //  camera.startPreview();
         }
         else {
             workWithCam.nonAutoFocus();

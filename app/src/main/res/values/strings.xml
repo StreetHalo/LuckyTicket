@@ -4,7 +4,10 @@
     <string name="nonFocus">Не удалось сфокусироваться</string>
     <string name="lucky">Вам повезло!</string>
     <string name="nonLucky">Повезет в другой раз</string>
-    <string name="emptyArray">Введите два и более числа</string>
+    <string name="emptyArray">Необходимо два и более числа</string>
     <string name="emptyPic">Сфотографируйте два и более числа</string>
+    <string name="need_permissions">Необходимо разрешение</string>
+    <string name="splash_create_file_error">Ошибка инициализации. Перезапустите приложение.</string>
+    <string name="check_error">Произошла ошибка. Повторите попытку.</string>
 
 </resources>

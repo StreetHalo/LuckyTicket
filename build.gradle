@@ -8,12 +8,7 @@ buildscript {
 
 
     }
- /*   android {
-        compileOptions {
-            targetCompatibility = "8"
-            sourceCompatibility = "8"
-        }
-    }*/
+
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'

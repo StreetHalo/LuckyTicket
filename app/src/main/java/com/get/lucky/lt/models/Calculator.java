@@ -2,6 +2,8 @@ package com.get.lucky.lt.models;
 
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+
 /**
  * Created by lucky on 06.02.2019.
  */
@@ -17,7 +19,11 @@ public class Calculator {
         numbers = new ArrayList<>();
     }
 
-    public int getResult(char[] chars){
+    public Observable<Integer> getResult(char[] chars){
+        return Observable.fromCallable(()->checkNumbers(chars));
+    }
+
+    private int checkNumbers(char[] chars){
         if(chars.length<2) return EMPTY_ARRAY;
         for (char a:chars) {
             numbers.add(Character.getNumericValue(a));

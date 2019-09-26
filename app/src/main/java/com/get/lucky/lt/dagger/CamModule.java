@@ -7,18 +7,16 @@ import com.get.lucky.lt.models.Calculator;
 import com.get.lucky.lt.models.Cam;
 import com.get.lucky.lt.models.CroppedImg;
 import com.get.lucky.lt.models.OcrImg;
-import com.get.lucky.lt.presenter.CamPresenter;
+import com.get.lucky.lt.views.cam_fragment.CamPresenter;
 
 import dagger.Module;
 import dagger.Provides;
 
 @Module
 public class CamModule {
-    private SurfaceView surfaceView;
     private Context context;
 
-    public CamModule(SurfaceView surfaceView, Context context) {
-        this.surfaceView = surfaceView;
+    public CamModule(Context context) {
         this.context = context;
     }
 
@@ -29,7 +27,7 @@ public class CamModule {
 
     @Provides
     Cam provideCam(){
-        return new Cam(surfaceView);
+        return new Cam();
     }
 
     @Provides
@@ -39,11 +37,7 @@ public class CamModule {
 
     @Provides
     OcrImg provideOcrImg(){
-        return new OcrImg(context);
+        return new OcrImg();
     }
 
-    @Provides
-    Calculator provideCalculator(){
-        return new Calculator();
-    }
 }

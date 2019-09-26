@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.Log;
 
-import com.get.lucky.lt.presenter.WorkWithOCR;
+import com.get.lucky.lt.views.cam_fragment.WorkWithOCR;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import io.reactivex.Observable;
@@ -16,38 +16,20 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class OcrImg {
-    private Context context;
     private WorkWithOCR workWithOCR;
     private Disposable disposable;
-    private boolean isWork = false;
     private String retStr = "No result";
     private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Lucky/";
 
     private static final String lang = "eng";
-
-    public OcrImg(Context context){
-        this.context = context;
-    }
 
     public void setPresenterInterface(WorkWithOCR workWithOCR){
         this.workWithOCR = workWithOCR;
     }
 
     @SuppressLint("CheckResult")
-    public void getText(Bitmap bitmap){
-        isWork = true;
-     disposable =   Observable.just(setBitmap(bitmap))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String s) throws Exception {
-                        if(isWork)
-                        workWithOCR.getResult(s);
-
-                    }
-                });
-
+    public Observable<String> getText(Bitmap bitmap){
+        return  Observable.fromCallable(()->setBitmap(bitmap));
     }
 
     private String setBitmap(Bitmap bitmap){
@@ -70,10 +52,4 @@ public class OcrImg {
         return retStr;
 
     }
-
-    public void stopOCR(){
-        isWork = false;
-        if(disposable!=null) disposable.dispose();
-    }
-
 }
