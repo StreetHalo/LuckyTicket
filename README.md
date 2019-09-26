@@ -11,8 +11,8 @@ This app using MVP arcitecture pattern and android.hardware.Camera.
 * [Cropper](https://github.com/edmodo/cropper) - for select an area with a ticket's number;
 * [Tesseract](https://github.com/rmtheis/tess-two) - OCR library for read number from cropped image.
 
-For work with views, async tasks and dependency injections:<br />
-* Butterknife, RxJava and Dagger 2.
+For work with async tasks and dependency injections:<br />
+* RxJava and Dagger 2.
 
 ### Remark
 If your ticket number not clear , maybe you can get problem with speed and reading numbers.
